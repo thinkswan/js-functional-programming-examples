@@ -75,7 +75,7 @@ class Point {
 }
 ```
 
-# Predictable: Pure, declarative functions
+## Predictable: Pure, declarative functions
 
 Pure functions respect the following criteria:
 
@@ -88,11 +88,14 @@ To illustrate the benefits of pure functions, consider these impure functions:
 ```javascript
 let name = "Alice"
 
-const getName = () => name // Depends on global variable
+// Depends on global variable
+const getName = () => name
 
-const setName = newName => (name = newName) // Mutates state
+// Mutates state
+const setName = newName => (name = newName)
 
-const printUpperName = () => console.log(name.toUpperCase()) // Depends on global variable _and_ mutates state
+// Depends on global variable _and_ mutates state
+const printUpperName = () => console.log(name.toUpperCase())
 ```
 
 These functions are difficult to test:
@@ -141,7 +144,7 @@ const doubleNumbers = numbers => {
   return doubled
 }
 
-// doubleNumbers([1, 2, 3]) == [2, 4, 6]
+doubleNumbers([1, 2, 3]) // [2, 4, 6]
 ```
 
 A **declarative** function declares _what the desired result is_. To rewrite the above function declaratively:
@@ -149,5 +152,79 @@ A **declarative** function declares _what the desired result is_. To rewrite the
 ```javascript
 const doubleNumbers = numbers => numbers.map(n => n * 2)
 
-// doubleNumbers([1, 2, 3]) == [2, 4, 6]
+doubleNumbers([1, 2, 3]) // [2, 4, 6]
 ```
+
+## Safe: State is immutable
+
+State should be created, not mutated.
+
+To illustrate the benefits of immutable state, consider this example:
+
+```javascript
+const hobbies = ["programming", "reading", "music"]
+
+const firstTwo = hobbies.splice(0, 2) // ['programming', 'reading']
+
+console.log(hobbies) // ['music']
+```
+
+One way to enforce immutable state is to use `Object#freeze`:
+
+```javascript
+const hobbies = Object.freeze[("programming", "reading", "music")]
+
+const firstTwo = hobbies.splice(0, 2) // TypeError
+```
+
+Another approach is to free the state. Consider the `Point` class from earlier:
+
+```javascript
+class Point {
+  constructor(x, y) {
+    this.x = x
+    this.y = y
+  }
+
+  moveBy(dx, dy) {
+    this.x == dx
+    this.y == dy
+  }
+}
+
+const point = new Point(0, 0)
+
+point.moveBy(5, 5)
+point.moveBy(-2, 2)
+
+console.log([point.x, point.y]) // [3, 7]
+```
+
+We can free this class' state as follows:
+
+```javascript
+const createPoint = (x, y) => Object.freeze([x, y])
+
+cosnt movePointBy = ([x, y], dx, dy) => Object.freeze([x + dx, y + dy])
+
+let point = createPoint(0, 0)
+
+point = movePointBy(point, 5, 5)
+point = movePointBy(point, -2, 2)
+
+console.log(point) // [3, 7]
+```
+
+Since immutable state requires us to return new data structures with each call, it has some pros and cons:
+
+- Pros
+  - Safety
+  - Free undo/redo logs (eg. Redux)
+  - Explicit flow of data
+  - Less memory usage (in some cases)
+  - Concurrency safety (in some cases)
+- Cons
+  - Verbose
+  - More object creation
+  - More garbage collections
+  - More memory usage
