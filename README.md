@@ -200,12 +200,12 @@ point.moveBy(-2, 2)
 console.log([point.x, point.y]) // [3, 7]
 ```
 
-We can free this class' state as follows:
+We can free the state in this class as follows:
 
 ```javascript
 const createPoint = (x, y) => Object.freeze([x, y])
 
-cosnt movePointBy = ([x, y], dx, dy) => Object.freeze([x + dx, y + dy])
+const movePointBy = ([x, y], dx, dy) => Object.freeze([x + dx, y + dy])
 
 let point = createPoint(0, 0)
 
@@ -221,8 +221,7 @@ Since immutable state requires us to return new data structures with each call, 
   - Safety
   - Free undo/redo logs (eg. Redux)
   - Explicit flow of data
-  - Less memory usage (in some cases)
-  - Concurrency safety (in some cases)
+  - Concurrency safety
 - Cons
   - Verbose
   - More object creation
@@ -233,7 +232,7 @@ Since immutable state requires us to return new data structures with each call, 
 
 JavaScript treats functions as first-class citizens. This means you can assign them to variables, pass them as input, and receive them as ouput, just like you can a boolean, number, or string.
 
-Before continuing, we should define a couple of terms:
+Before continuing, we should define a few terms:
 
 - **Higher-order functions** return a new function.
 - **Closures** encapsulate state.
@@ -243,10 +242,10 @@ Before continuing, we should define a couple of terms:
 Consider the following example:
 
 ```javascript
-// This function is both a higher-order function (because it returns a new function) and a closure (because it "closes over `x`")
+// This function is both a higher-order function (because it returns a new function) and a closure (because it "closes over" `x`)
 const createAdder = x => y => x + y
 
-// This function is a partially-applied function (because it applies `x = 3`, but not `y``)
+// This function is a partially-applied function (because it applies `x = 3`, but not `y`)
 const add3 = createAdder(3)
 
 add3(2) // 5
