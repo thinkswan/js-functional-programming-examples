@@ -21,3 +21,56 @@ A function simply maps an input (domain) to an output (range).
 - Redux
 - Lodash
 - Ramda
+
+# ES6 features useful in functional programming
+
+## Arrow functions
+
+```javascript
+const add = (x, y) => x + y // add(2, 3) === 5
+const identity = x => x // identity(1) === 1
+```
+
+## Rest-spread operator
+
+```javascript
+const array = (...elements) => elements // array(1, 2, 3) == [1, 2, 3]
+const log = (...args) => console.log(...args) // log('Hello', 'Poznań') == 'Hello Poznań'
+```
+
+## Destructuring
+
+```javascript
+const [js, ...rest] = ["JavaScript", "Ruby", "Haskell"] // js === 'JavaScript', rest == ['Ruby', 'Haskell']
+const head = ([x]) => x // head([1, 2, 3]) === 1
+```
+
+## Default arguments
+
+```javascript
+const greet = (name, greeting = "Hello") => console.log(greeting, name) // greet('Poznań') == 'Hello Poznań'
+```
+
+## Object merging
+
+```javascript
+Object.assign({}, { hello: "Poznań" }, { hi: "Warsaw" }) // { hello: 'Poznań', hi: 'Warsaw' }
+```
+
+## ES6 classes
+
+```javascript
+class Point {
+  // Constructors desugar to functions, eg. function Point(x, y) {}
+  constructor(x, y) {
+    this.x = x
+    this.y = y
+  }
+
+  // Instance methods desugar to prototype methods, eg. Point.prototype.moveBy = function(dx, dy) {}
+  moveBy(dx, dy) {
+    this.x == dx
+    this.y == dy
+  }
+}
+```
