@@ -13,7 +13,7 @@ A function simply maps an input (domain) to an output (range).
 - **Predictable:** Pure, declarative functions
 - **Safe:** State is immutable
 - **Transparent:** State is first-class
-- **Modular:** Compose first-class closures
+- **Modular:** Compose first-class functions
 
 ## Functional programming libs
 
@@ -228,3 +228,149 @@ Since immutable state requires us to return new data structures with each call, 
   - More object creation
   - More garbage collections
   - More memory usage
+
+## Modular: Compose first-class functions
+
+JavaScript treats functions as first-class citizens. This means you can assign them to variables, pass them as input, and receive them as ouput, just like you can a boolean, number, or string.
+
+Before continuing, we should define a couple of terms:
+
+- **Higher-order functions** return a new function.
+- **Closures** encapsulate state.
+- **Partially-applied functions** return a new function with 1 or more of the inputs set (similar to `bind`).
+- **Curryable functions** are functions that can be partially-applied and will invoke once all inputs are set.
+
+Consider the following example:
+
+```javascript
+// This function is both a higher-order function (because it returns a new function) and a closure (because it "closes over `x`")
+const createAdder = x => y => x + y
+
+// This function is a partially-applied function (because it applies `x = 3`, but not `y``)
+const add3 = createAdder(3)
+
+add3(2) // 5
+add3(3) // 6
+```
+
+Perhaps a more practical example:
+
+```javascript
+const request = options => {
+  return fetch(options.url, options).then(resp => resp.json())
+}
+
+const usersPromise = request({
+  url: "/users",
+  headers: { "X-Custom": "myKey" }
+})
+const tasksPromise = request({
+  url: "/tasks",
+  headers: { "X-Custom": "myKey" }
+})
+```
+
+We can make this more reusable as follows:
+
+```javascript
+const createRequester = options => {
+  return otherOptions => request(Object.assign({}, options, otherOptions))
+}
+
+const customRequest = createRequester({ headers: { "X-Custom": "myKey" } })
+
+const usersPromise = customRequest({ url: "/users" })
+const tasksPromise = customRequest({ url: "/tasks" })
+```
+
+Moving on to curryable functions, let's recreate the adder and requester from above:
+
+```javascript
+const add = x => y => x + y
+const request = defaults => options => {
+  options = Object.assign({}, defaults, options)
+
+  return fetch(options.url, options).then(resp => resp.json())
+}
+```
+
+With the building blocks of higher-order functions, closures, partially-applied functions, and curryable functions, let's look at a shopping cart example:
+
+```javascript
+const map = fn => array => array.map(fn)
+const multiply = x => y => x * y
+const pluck = key => object => object[key]
+
+const discount = multiply(0.98)
+const tax = multiply(1.0925)
+const customRequest = request({ headers: { "X-Custom": "myKey" } })
+
+customRequest({ url: "/cart/items" }) // [{ price: 5 }, { price: 10 }, { price: 3 }]
+  .then(map(pluck("price"))) // [5, 10, 3]
+  .then(map(discount)) // [4.9, 9.8, 2.94]
+  .then(map(tax)) // [5.35, 10.71, 3.21]
+```
+
+We can also compose closures:
+
+```javascript
+const processWord = compose(
+  hyphenate,
+  reverse,
+  toUpperCase
+) // Same as `word => hyphenate(reverse(toUpperCase(word)))`
+
+const words = ["hello", "functional", "programming"]
+
+const newWords = words.map(processWord) // ['OL-LEH', 'LANOI-TCNUF', 'GNIMM-ARGORP']
+```
+
+To improve the performance of the shopping cart example, we can replace the 3 `map` interations with a single iteration:
+
+```javascript
+customRequest({ url: "/cart/items" }) // [{ price: 5 }, { price: 10 }, { price: 3 }]
+  .then(
+    map(
+      compose(
+        tax,
+        discount,
+        pluck("price")
+      )
+    )
+  ) // [5, 10, 3] => [4.9, 9.8, 2.94] => [5.35, 10.71, 3.21]
+```
+
+Finally, to handle loops in functional programming, we can use recursion. Consider a function that solves a factorial:
+
+```javascript
+const factorial = n => {
+  let result = 1
+
+  while (n > 1) {
+    result *= n
+    n--
+  }
+
+  return result
+}
+```
+
+To rewrite this recursively:
+
+```javascript
+const factorial = n => {
+  if (n < 2) return 1
+
+  return n * factorial(n - 1)
+}
+```
+
+To avoid exceeding the call stack size, we can optimize this further using tail call optimization:
+
+```javascript
+const factorial = (n, accum = 1) => {
+  if (n < 2) return accum
+
+  return factorial(n - 1, n * accum)
+}
+```
